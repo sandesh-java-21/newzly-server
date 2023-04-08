@@ -2,8 +2,9 @@ const mongoose = require("mongoose");
 
 const userSchema = new mongoose.Schema({
   author: {
-    type: String,
+    type: mongoose.Schema.Types.ObjectId,
     required: false,
+    ref: "users",
   },
   title: {
     type: String,
@@ -21,7 +22,7 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: false,
   },
-  total_reads: {
+  reading_time: {
     type: Number,
     required: false,
     default: 0,

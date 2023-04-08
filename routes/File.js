@@ -2,6 +2,7 @@ const { json } = require("express");
 const express = require("express");
 const router = express.Router();
 const fs = require("fs");
+const cloudinary = require("cloudinary").v2;
 
 router.get("/make", async (req, res) => {
   try {
@@ -37,6 +38,23 @@ router.post("/import-data", async (req, res) => {
     res.json(data);
   } catch (error) {
     console.log(error);
+  }
+});
+
+router.post("/retrieve-image", async (req, res) => {
+  try {
+    var { image } = req.body;
+    cloudinary.uploader
+      .upload(`data:image/jpeg;base64,${image}`)
+      .then(async (result) => {
+        res.send(result.secure_url);
+      })
+      .catch((error) => {
+        console.log(error);
+        res.send(error);
+      });
+  } catch (error) {
+    res.send(error);
   }
 });
 
