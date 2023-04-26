@@ -35,6 +35,7 @@ const usersRoutes = require("./routes/Users");
 const emailRoutes = require("./routes/Email");
 const parseRoutes = require("./routes/File");
 const forgotPasswordRoutes = require("./routes/ForgotPassword");
+const categoriesRoutes = require("./routes/Categories");
 
 app.use(cors());
 
@@ -48,6 +49,8 @@ app.use("/api/news", newsRoutes);
 app.use("/api/users", usersRoutes);
 app.use("/api/email", emailRoutes);
 app.use("/api/file", parseRoutes);
+app.use("/api/category", categoriesRoutes);
+
 app.use("/api/forgot-password", forgotPasswordRoutes);
 
 app.listen(PORT, (err) => {

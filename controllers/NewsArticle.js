@@ -5,36 +5,49 @@ const User = require("../models/User");
 const createNewsArticle = async (req, res) => {
   try {
     var { author, title, description, location, image, category } = req.body;
+    console.log(
+      "data: ",
+      author,
+      title,
+      description,
+      location,
+      image,
+      category
+    );
     let modelImage = "";
 
-    cloudinary.uploader.upload(image).then(async (result) => {
-      modelImage = result.secure_url;
-      var news = new NewsArticle({
-        author,
-        title,
-        description,
-        location,
-        image: modelImage,
-      });
-
-      var savedNews = await news
-        .save()
-        .then((savedResult) => {
-          res.status(200).json({
-            status: "200",
-            savedNews,
-            message: "news article created successfully!",
-          });
-        })
-
-        .catch((error) => {
-          res.status(406).json({
-            status: "406",
-            message: "error occured",
-            error: error,
-          });
+    cloudinary.uploader
+      .upload(image, {
+        folder: "news",
+      })
+      .then(async (result) => {
+        modelImage = result.secure_url;
+        var news = new NewsArticle({
+          author,
+          title,
+          description,
+          location,
+          image: modelImage,
         });
-    });
+
+        var savedNews = await news
+          .save()
+          .then((savedResult) => {
+            res.status(200).json({
+              status: "200",
+              savedNews,
+              message: "news article created successfully!",
+            });
+          })
+
+          .catch((error) => {
+            res.status(406).json({
+              status: "406",
+              message: "error occured",
+              error: error,
+            });
+          });
+      });
   } catch (error) {
     console.log(error);
     res.status(500).json({
