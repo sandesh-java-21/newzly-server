@@ -20,6 +20,7 @@ const createNewsArticle = async (req, res) => {
           description,
           location: location !== "" ? location : "",
           image: modelImage,
+          category: category,
         });
 
         var savedNews = await news
@@ -55,7 +56,12 @@ const createNewsArticle = async (req, res) => {
 
 const getAllNewsArticles = async (req, res) => {
   try {
-    var allNewsArticles = await NewsArticle.find().sort({ _id: -1 }).limit(100);
+    var allNewsArticles = await NewsArticle.find()
+      .populate("category", {
+        name: 1,
+      })
+      .sort({ _id: -1 })
+      .limit(50);
     if (allNewsArticles && allNewsArticles.length >= 0) {
       res.status(200).json({
         status: "200",
@@ -328,10 +334,127 @@ const getNewsArticlesByCategoryId = async (req, res) => {
   }
 };
 
+const updateNewsArticle = async (req, res) => {
+  try {
+    var news_article_id = req.params.news_article_id;
+    var { title, description, category } = req.body;
+
+    if (!news_article_id || news_article_id === "") {
+      res.json({
+        message: "Required fields are empty!",
+        status: "400",
+      });
+    } else {
+      var news = await NewsArticle.findById(news_article_id)
+        .then(async (onNewsFound) => {
+          console.log("on news found: ", onNewsFound);
+          var filter = {
+            _id: onNewsFound._id,
+          };
+
+          var updateData = {
+            title,
+            description,
+            category,
+          };
+
+          var updated = await NewsArticle.findByIdAndUpdate(
+            filter,
+            updateData,
+            {
+              new: true,
+            }
+          )
+            .then(async (onNewsUpdate) => {
+              console.log("on news update: ", onNewsUpdate);
+              res.json({
+                message: "News Article Updated!",
+                status: "200",
+                updatedNews: onNewsUpdate,
+              });
+            })
+            .catch(async (onNewsUpdateError) => {
+              console.log("on news update error: ", onNewsUpdateError);
+              res.json({
+                message: "Something went wrong while updating news article!",
+                status: "400",
+              });
+            });
+        })
+        .catch(async (onNewsFoundError) => {
+          console.log("on news found error: ", onNewsFoundError);
+          res.json({
+            message: "News Article Not Found!",
+            status: "404",
+            newsArticle: null,
+          });
+        });
+    }
+  } catch (error) {
+    res.json({
+      status: "500",
+      message: "Internal Server Error",
+      error,
+    });
+  }
+};
+
+const deleteNewsArticleById = async (req, res) => {
+  try {
+    var news_article_id = req.params.news_article_id;
+
+    if (!news_article_id || news_article_id === "") {
+      res.json({
+        message: "Required fields are empty!",
+        status: "400",
+      });
+    } else {
+      var deleted = await NewsArticle.findById(news_article_id)
+        .then(async (onNewsArticleFound) => {
+          console.log("on news article found: ", onNewsArticleFound);
+
+          var deleted = await NewsArticle.findByIdAndDelete(
+            onNewsArticleFound._id
+          )
+            .then(async (onNewsDelete) => {
+              console.log("on news delete: ", onNewsDelete);
+              res.json({
+                message: "News Article Deleted!",
+                status: "200",
+              });
+            })
+
+            .catch(async (onNewsDeleteError) => {
+              console.log("on news delete error: ", onNewsDeleteError);
+              res.json({
+                message: "Something went wrong while deleting news article!",
+                status: "400",
+              });
+            });
+        })
+        .catch(async (onNewsArticleFoundError) => {
+          console.log("on news article found error: ", onNewsArticleFoundError);
+          res.json({
+            message: "News Article Not Found!",
+            status: "404",
+          });
+        });
+    }
+  } catch (error) {
+    res.json({
+      status: "500",
+      message: "Internal Server Error",
+      error,
+    });
+  }
+};
+
 module.exports = {
   createNewsArticle,
   getAllNewsArticles,
   likeNewsArticle,
   disLikeNewsArticle,
   getNewsArticlesByCategoryId,
+  updateNewsArticle,
+  deleteNewsArticleById,
 };

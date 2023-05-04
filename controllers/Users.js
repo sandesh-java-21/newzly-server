@@ -1,4 +1,5 @@
 const User = require("../models/User");
+const cloudinary = require("cloudinary").v2;
 
 const getUserById = async (req, res) => {
   try {
@@ -124,8 +125,106 @@ const deleteUserById = async (req, res) => {
   }
 };
 
+const updateProfilePicture = async (req, res) => {
+  try {
+    var user_id = req.params.user_id;
+
+    var { image } = req.body;
+
+    if (!user_id || user_id === "") {
+      res.json({
+        message: "Required field are empty!",
+        status: "400",
+      });
+    } else {
+      var user = await User.findById(user_id)
+        .then(async (onUserFound) => {
+          console.log("on user found: ", onUserFound);
+
+          cloudinary.uploader
+            .upload(`data:image/jpeg;base64,${image}`, {
+              folder: "user-profiles",
+            })
+            .then(async (onImageUploadCloudinary) => {
+              console.log(
+                "on image upload cloudinary: ",
+                onImageUploadCloudinary
+              );
+
+              var public_id = onImageUploadCloudinary.public_idl;
+              var imageUrl = onImageUploadCloudinary.secure_url;
+
+              var filter = {
+                _id: onUserFound._id,
+              };
+
+              var updateData = {
+                image: {
+                  url: imageUrl,
+                  public_id: public_id,
+                },
+              };
+
+              var updated = await User.findByIdAndUpdate(filter, updateData, {
+                new: true,
+              })
+                .then(async (onUserProfileUpdate) => {
+                  console.log("on user profile update: ", onUserProfileUpdate);
+                  res.json({
+                    message: "User Profile Uploaded!",
+                    status: "200",
+                    updatedUser: onUserProfileUpdate,
+                    profileNew: onUserProfileUpdate.profile_image,
+                  });
+                })
+                .catch(async (onUserProfileUpdateError) => {
+                  console.log(
+                    "on user profile update error: ",
+                    onUserProfileUpdateError
+                  );
+                  res.json({
+                    message:
+                      "Something went wrong while updating profile image!",
+                    status: "400",
+                    error: onUserProfileUpdateError,
+                  });
+                });
+            })
+            .catch(async (onImageUploadCloudinaryError) => {
+              console.log(
+                "on image upload cloudinary error: ",
+                onImageUploadCloudinaryError
+              );
+              res.json({
+                message:
+                  "Something went wrong while uploading profile picture!",
+                status: "400",
+                error: onImageUploadCloudinaryError,
+              });
+            });
+        })
+        .catch(async (onUserFoundError) => {
+          console.log("on user found error: ", onUserFoundError);
+          res.json({
+            message: "User Not Found!",
+            status: "404",
+          });
+        });
+    }
+  } catch (error) {
+    var responseData = {
+      error: error,
+      status: "500",
+      message: "Internal Server Error!",
+    };
+
+    res.json(responseData);
+  }
+};
+
 module.exports = {
   getUserById,
   updateUserById,
   deleteUserById,
+  updateProfilePicture,
 };

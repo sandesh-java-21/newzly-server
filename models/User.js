@@ -47,6 +47,19 @@ const userSchema = new mongoose.Schema({
     default: false,
   },
 
+  profile_image: {
+    url: {
+      type: String,
+      required: false,
+      default: "",
+    },
+    public_id: {
+      type: String,
+      required: false,
+      default: "",
+    },
+  },
+
   notification_token: {
     type: String,
     required: false,
