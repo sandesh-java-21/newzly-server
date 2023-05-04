@@ -5,19 +5,11 @@ const User = require("../models/User");
 const createNewsArticle = async (req, res) => {
   try {
     var { author, title, description, location, image, category } = req.body;
-    console.log(
-      "data: ",
-      author,
-      title,
-      description,
-      location,
-      image,
-      category
-    );
+    console.log("data: ", author, title, description, location, category);
     let modelImage = "";
 
     cloudinary.uploader
-      .upload(image, {
+      .upload(`data:image/jpeg;base64,${image}`, {
         folder: "news",
       })
       .then(async (result) => {
@@ -26,7 +18,7 @@ const createNewsArticle = async (req, res) => {
           author,
           title,
           description,
-          location,
+          location: location !== "" ? location : "",
           image: modelImage,
         });
 
@@ -35,7 +27,7 @@ const createNewsArticle = async (req, res) => {
           .then((savedResult) => {
             res.status(200).json({
               status: "200",
-              savedNews,
+              savedNews: savedResult,
               message: "news article created successfully!",
             });
           })
@@ -47,6 +39,9 @@ const createNewsArticle = async (req, res) => {
               error: error,
             });
           });
+      })
+      .catch(async (onError) => {
+        console.log("jygsdfjgfdsjhgfds", onError);
       });
   } catch (error) {
     console.log(error);
