@@ -13,7 +13,7 @@ const getUserById = async (req, res) => {
     if (!users.length <= 0) {
       res.json({
         status: "200",
-        users: users,
+        user: users[0],
         message: "user found with provided id",
       });
     } else {

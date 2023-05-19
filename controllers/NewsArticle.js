@@ -102,73 +102,83 @@ const likeNewsArticle = async (req, res) => {
 
           var author = await User.findById({
             _id: newsArticleObj.author,
-          }).then(async (onAuthorFound) => {
-            var authorObj = onAuthorFound;
-            console.log("on news author found: ", onAuthorFound);
+          })
+            .then(async (onAuthorFound) => {
+              var authorObj = onAuthorFound;
+              console.log("on news author found: ", onAuthorFound);
 
-            var filter = {
-              _id: author._id,
-            };
+              var filter = {
+                _id: authorObj._id,
+              };
 
-            var coinUpdateData = {
-              total_coins: authorObj.total_coins + 1,
-            };
+              var coinUpdateData = {
+                total_coins: authorObj.total_coins + 1,
+              };
 
-            var updatedAuthor = await User.findByIdAndUpdate(
-              filter,
-              coinUpdateData,
-              {
-                new: true,
-              }
-            )
-              .then(async (onCoinsUpdate) => {
-                console.log("on coins update: ", onCoinsUpdate);
+              var updatedAuthor = await User.findByIdAndUpdate(
+                filter,
+                coinUpdateData,
+                {
+                  new: true,
+                }
+              )
+                .then(async (onCoinsUpdate) => {
+                  console.log("on coins update: ", onCoinsUpdate);
 
-                var filter = {
-                  _id: newsArticleObj._id,
-                };
+                  var filter = {
+                    _id: newsArticleObj._id,
+                  };
 
-                var newsArticleCoinUpdateData = {
-                  total_likes: newsArticleObj.total_likes + 1,
-                };
+                  var newsArticleCoinUpdateData = {
+                    total_likes: newsArticleObj.total_likes + 1,
+                  };
 
-                var updatedNews = await NewsArticle.findByIdAndUpdate(
-                  filter,
-                  newsArticleCoinUpdateData,
-                  {
-                    new: true,
-                  }
-                )
-                  .then(async (onNewsCoinUpdate) => {
-                    console.log("on news coin update: ", onNewsCoinUpdate);
-                    res.json({
-                      message: "You Liked This Newz!",
-                      status: "200",
-                      updatedNews: onNewsCoinUpdate,
-                      updated_likes: onNewsCoinUpdate.total_likes,
+                  var updatedNews = await NewsArticle.findByIdAndUpdate(
+                    filter,
+                    newsArticleCoinUpdateData,
+                    {
+                      new: true,
+                    }
+                  )
+                    .then(async (onNewsCoinUpdate) => {
+                      console.log("on news coin update: ", onNewsCoinUpdate);
+                      res.json({
+                        message: "You Liked This Newz!",
+                        status: "200",
+                        updatedNews: onNewsCoinUpdate,
+                        updated_likes: onNewsCoinUpdate.total_likes,
+                      });
+                    })
+                    .catch(async (onNewsCoinUpdateError) => {
+                      console.log(
+                        "on news coin update error: ",
+                        onNewsCoinUpdateError
+                      );
+                      res.json({
+                        message: "Something went wrong!",
+                        status: "400",
+                        error: onNewsCoinUpdateError,
+                      });
                     });
-                  })
-                  .catch(async (onNewsCoinUpdateError) => {
-                    console.log(
-                      "on news coin update error: ",
-                      onNewsCoinUpdateError
-                    );
-                    res.json({
-                      message: "Something went wrong!",
-                      status: "400",
-                      error: onNewsCoinUpdateError,
-                    });
+                })
+                .catch(async (onUserCoinsNotUpdate) => {
+                  console.log(
+                    "on user coins not update: ",
+                    onUserCoinsNotUpdate
+                  );
+                  res.json({
+                    message: "Something went wrong!",
+                    status: "400",
+                    error: onUserCoinsNotUpdate,
                   });
-              })
-              .catch(async (onUserCoinsNotUpdate) => {
-                console.log("on user coins not update: ", onUserCoinsNotUpdate);
-                res.json({
-                  message: "Something went wrong!",
-                  status: "400",
-                  error: onUserCoinsNotUpdate,
                 });
+            })
+            .catch(async (onAuthorFoundError) => {
+              console.log("on author found error: ", onAuthorFoundError);
+              res.json({
+                onAuthorFoundError,
               });
-          });
+            });
         })
         .catch(async (onNewsArticleNotFound) => {
           console.log("on news article not found: ", onNewsArticleNotFound);
@@ -212,11 +222,11 @@ const disLikeNewsArticle = async (req, res) => {
             console.log("on news author found: ", onAuthorFound);
 
             var filter = {
-              _id: author._id,
+              _id: authorObj._id,
             };
 
             var coinUpdateData = {
-              total_coins: authorObj.total_coins - 1,
+              total_coins: authorObj.total_coins,
             };
 
             var updatedAuthor = await User.findByIdAndUpdate(
@@ -234,7 +244,7 @@ const disLikeNewsArticle = async (req, res) => {
                 };
 
                 var newsArticleCoinUpdateData = {
-                  total_likes: newsArticleObj.total_likes - 1,
+                  total_dislikes: newsArticleObj.total_dislikes + 1,
                 };
 
                 var updatedNews = await NewsArticle.findByIdAndUpdate(
@@ -247,7 +257,7 @@ const disLikeNewsArticle = async (req, res) => {
                   .then(async (onNewsCoinUpdate) => {
                     console.log("on news coin update: ", onNewsCoinUpdate);
                     res.json({
-                      message: "You Liked This Newz!",
+                      message: "You Disliked This Newz!",
                       status: "200",
                       updatedNews: onNewsCoinUpdate,
                       updated_likes: onNewsCoinUpdate.total_likes,
