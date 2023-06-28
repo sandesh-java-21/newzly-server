@@ -1,6 +1,9 @@
 const User = require("../models/User");
 const cloudinary = require("cloudinary").v2;
 
+const { uploadImageToCloudinary } = require("../utils/Cloudinary");
+const { cloudinaryFolderNames } = require("../constants/FolderNames");
+
 const getUserById = async (req, res) => {
   try {
     var _id = req.params.id;
@@ -141,17 +144,19 @@ const updateProfilePicture = async (req, res) => {
         .then(async (onUserFound) => {
           console.log("on user found: ", onUserFound);
 
-          cloudinary.uploader
-            .upload(`data:image/jpeg;base64,${image}`, {
-              folder: "user-profiles",
-            })
+          // cloudinary.uploader
+          //   .upload(`data:image/jpeg;base64,${image}`, {
+          //     folder: "user-profiles",
+          //   })
+
+          uploadImageToCloudinary(image, cloudinaryFolderNames.USER_PROFILES)
             .then(async (onImageUploadCloudinary) => {
               console.log(
                 "on image upload cloudinary: ",
                 onImageUploadCloudinary
               );
 
-              var public_id = onImageUploadCloudinary.public_idl;
+              var public_id = onImageUploadCloudinary.public_id;
               var imageUrl = onImageUploadCloudinary.secure_url;
 
               var filter = {
@@ -159,7 +164,7 @@ const updateProfilePicture = async (req, res) => {
               };
 
               var updateData = {
-                image: {
+                profile_image: {
                   url: imageUrl,
                   public_id: public_id,
                 },
@@ -284,6 +289,55 @@ const authenticateUserAsJournalist = async (req, res) => {
     res.json(responseData);
   }
 };
+
+// const uploadProfileImage = async (req, res) => {
+//   try {
+//     var user_id = req.params.user_id;
+
+//     if (!user_id || user_id === "") {
+//       res.json({
+//         message: "Required fields are empty!",
+//         status: "400",
+//       });
+//     } else {
+//       var user = await User.findById(user_id)
+//         .then(async (onUserFound) => {
+//           console.log("on user found: ", onUserFound);
+//           var { imageBase64 } = req.body;
+
+//           if (!imageBase64 || imageBase64 === "") {
+//             res.json({
+//               message: "Please select a image from gallery!",
+//               status: "400",
+//             });
+//           } else {
+
+//             uploadImageToCloudinary(imageBase64, cloudinaryFolderNames.USER_PROFILES)
+//             .then(async(onImageUpload)=>{
+//               console.log("on image upload: ", onImageUpload);
+//             })
+
+//           }
+//         })
+//         .catch((onUserFoundError) => {
+//           console.log("on user found error: ", onUserFoundError);
+//           res.json({
+//             message: "User not found!",
+//             status: "404",
+//             error: onUserFoundError,
+//           });
+//         });
+//     }
+//   } catch (error) {
+//     var responseData = {
+//       error: error,
+//       status: "500",
+//       message: "Internal Server Error!",
+//     };
+
+//     res.json(responseData);
+//   }
+// };
 
 module.exports = {
   getUserById,
