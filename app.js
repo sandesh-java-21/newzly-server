@@ -57,7 +57,7 @@ app.listen(PORT, (err) => {
   if (err) {
     console.log(err);
   } else {
-    console.log("NEWSY API is running on PORT: ", PORT);
+    console.log("NEWZLY API is  running on PORT: ", PORT);
 
     mongoose.set("strictQuery", true);
 

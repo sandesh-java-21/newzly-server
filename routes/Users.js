@@ -10,4 +10,9 @@ router.patch(
   controllers.updateProfilePicture
 );
 
+router.patch(
+  "/make-user-as-journalist/:user_id",
+  controllers.authenticateUserAsJournalist
+);
+
 module.exports = router;

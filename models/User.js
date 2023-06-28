@@ -65,6 +65,12 @@ const userSchema = new mongoose.Schema({
     required: false,
     default: "",
   },
+
+  is_journalist: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
 });
 
 module.exports = mongoose.model("users", userSchema);

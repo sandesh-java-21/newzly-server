@@ -222,9 +222,73 @@ const updateProfilePicture = async (req, res) => {
   }
 };
 
+const authenticateUserAsJournalist = async (req, res) => {
+  try {
+    var user_id = req.params.user_id;
+    if (!user_id || user_id === "") {
+      res.json({
+        message: "Required fields are empty!",
+        status: "400",
+      });
+    } else {
+      var user = await User.findById(user_id)
+        .then(async (onUserFound) => {
+          console.log("on user found: ", onUserFound);
+
+          var updatedData = {
+            is_journalist: true,
+          };
+          var filter = {
+            _id: onUserFound._id,
+          };
+
+          var updatedUser = await User.findByIdAndUpdate(filter, updatedData, {
+            new: true,
+          })
+            .then((onUserUpdate) => {
+              console.log("on user update: ", onUserUpdate);
+
+              res.json({
+                message: "User is now authenticated journalist!",
+                status: "200",
+                success: true,
+                authenticatedJournalist: onUserUpdate,
+              });
+            })
+            .catch((onUserUpdateError) => {
+              console.log("on user update error: ", onUserUpdateError);
+              res.json({
+                message:
+                  "Something went wrong while making a user as a authenticated journalist!",
+                status: "400",
+                error: onUserUpdateError,
+              });
+            });
+        })
+        .catch(async (onUserFoundError) => {
+          console.log("on user found error: ", onUserFoundError);
+          res.json({
+            message: "User not found!",
+            status: "404",
+            error: onUserFoundError,
+          });
+        });
+    }
+  } catch (error) {
+    var responseData = {
+      error: error,
+      status: "500",
+      message: "Internal Server Error!",
+    };
+
+    res.json(responseData);
+  }
+};
+
 module.exports = {
   getUserById,
   updateUserById,
   deleteUserById,
   updateProfilePicture,
+  authenticateUserAsJournalist,
 };

@@ -80,9 +80,12 @@ const sendForgotPasswordOtpEmail = async (req, res) => {
         });
 
         otpObj.save();
-
-        res.send("Forgot Password OTP Email Sent");
         console.log("Email sent: " + info.response);
+
+        res.json({
+          message: "Forgot Password OTP Email Sent",
+          status: "200",
+        });
       }
     });
   } catch (error) {
@@ -111,6 +114,7 @@ const verifyForgotPasswordOtp = async (req, res) => {
       })
         .then(async (onOtpFound) => {
           var otpObj = onOtpFound;
+          console.log("otp obj: ", otpObj, otp_code);
 
           if (otpObj.email === email_address && otpObj.otp_code === otp_code) {
             var deletedOtp = await OTP.findOneAndDelete({
