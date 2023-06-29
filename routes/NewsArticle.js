@@ -6,6 +6,8 @@ router.post("/create-news", controllers.createNewsArticle);
 
 router.get("/all-news-articles", controllers.getAllNewsArticles);
 
+router.get("/all-home-news-articles", controllers.getHomeNewsArticles);
+
 router.get(
   "/category-based-news-articles/:category_id",
   controllers.getNewsArticlesByCategoryId
